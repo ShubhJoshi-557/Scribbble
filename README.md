@@ -1,15 +1,11 @@
-# Memories
+# Scribbble
 
-![Memories](https://i.ibb.co/7CmVbCW/image.png)
+![laptop-png-6759 (1)](https://user-images.githubusercontent.com/62555809/192317051-817246f2-7c34-4dd6-a60f-364c48adfbd6.png)
 
-## Introduction
-This is a code repository for the corresponding video tutorial - https://youtube.com/playlist?list=PL6QREj8te1P7VSwhrMf3D3Xt4V6_SRkhu.
 
-Using React, Node.js, Express & MongoDB you'll learn how to build a Full Stack MERN Application - from start to finish. The App is called "Memories" and it is a simple social media app that allows users to post interesting events that happened in their lives.
-
-By the end of this video, you will have a strong understanding of how the MERN Stack works.
+## About
+;asudhiouahgfroi9
 
 Setup:
 - run ```npm i && npm start``` for both client and server side to start the app
 
-TODO: rename post message, refactor reducers, add some cool memories, maybe clickable tags, fix update functionality
