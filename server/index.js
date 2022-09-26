@@ -16,6 +16,10 @@ app.use(cors());
 app.use('/posts', postRoutes);
 app.use("/user", userRouter);
 
+app.get('/', (req, res) =>{
+  res.send('APP IS RUNNING.');
+})
+
 const CONNECTION_URL = 'mongodb+srv://ssjuser1:mlOGkM4EqbDi08TZ@cluster0.0g9x79v.mongodb.net/scribbble?retryWrites=true&w=majority';
 // mongodb+srv://ssjuser1:mlOGkM4EqbDi08TZ@cluster0.0g9x79v.mongodb.net/?retryWrites=true&w=majority
 // mongodb+srv://js_mastery:M6WfDnJEoj9HkV2d@practice.jto9p.mongodb.net/memories_app?retryWrites=true&w=majority
