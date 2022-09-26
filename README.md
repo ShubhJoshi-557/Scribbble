@@ -6,6 +6,6 @@
 ## About
 Scribbble is a fullstack social media web application inspired by Dribbble, made for Developers and Web Designers to share their projects and get inspiration from other's projects.
 
-# Setup:
+## Setup:
 - run ```npm i && npm start``` for both client and server side to start the app
 
