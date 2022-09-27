@@ -41,6 +41,7 @@ export default makeStyles((theme) => ({
   gridContainer: {
     padding:'80px',
     [theme.breakpoints.down('lg')]: {
+      padding:'80px 30px',
       flexDirection: 'column-reverse',
     },
   },

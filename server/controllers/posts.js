@@ -1,261 +1,367 @@
-import express from 'express';
-import mongoose from 'mongoose';
+import express from "express";
+import mongoose from "mongoose";
 
-import PostMessage from '../models/postMessage.js';
+import PostMessage from "../models/postMessage.js";
 
 const router = express.Router();
 
 export const getPosts = async (req, res) => {
-    const { page } = req.query;
-    
-    try {
-        const LIMIT = 20;
-        const startIndex = (Number(page) - 1) * LIMIT; // get the starting index of every page
-    
-        const total = await PostMessage.countDocuments({});
-        const posts = await PostMessage.find().sort({ _id: -1 }).limit(LIMIT).skip(startIndex);
+  const { page } = req.query;
 
-        res.json({ data: posts, currentPage: Number(page), numberOfPages: Math.ceil(total / LIMIT)});
-    } catch (error) {    
-        res.status(404).json({ message: error.message });
-    }
-}
+  try {
+    const LIMIT = 20;
+    const startIndex = (Number(page) - 1) * LIMIT; // get the starting index of every page
+
+    const total = await PostMessage.countDocuments({});
+    const posts = await PostMessage.find()
+      .sort({ _id: -1 })
+      .limit(LIMIT)
+      .skip(startIndex);
+
+    res.json({
+      data: posts,
+      currentPage: Number(page),
+      numberOfPages: Math.ceil(total / LIMIT),
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
 export const getPostsBySearch = async (req, res) => {
-    const { searchQuery, tags, sortBy } = req.query;
+  const { searchQuery, tags, sortBy } = req.query;
 
-    try {
-        const title = new RegExp(searchQuery, "i");
+  try {
+    const title = new RegExp(searchQuery, "i");
 
-        // const posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]});
-        
-        let posts;
-        switch (sortBy) {
-            case '':
-                posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]})
-                break;
-            case 'oldest':
-                if(searchQuery=='none' && tags=='') posts = await PostMessage.find().sort({ createdAt: 1 });
-                else posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]}).sort({ createdAt: 1 });
-                break;
-            case 'latest':
-                if(searchQuery=='none' && tags=='') posts = await PostMessage.find().sort({ createdAt: -1 });
-                else posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]}).sort({ createdAt: -1 });
-                break;
-            case 'mostPopular':
-                if(searchQuery=='none' && tags==''){
-                    posts = await PostMessage.aggregate([
-                        {
-                            '$unwind': {
-                            'path': '$likes'
-                            }
-                        }, {
-                            '$group': {
-                            '_id': {'_id':'$_id', 'title': '$title', 'message': '$message','name': '$name','creator': '$creator',
-                            'codeUrl': '$codeUrl','demoUrl': '$demoUrl','demoUrl': '$demoUrl','imageUrl': '$imageUrl',
-                            'selectedFile': '$selectedFile','comments': '$comments','createdAt': '$createdAt',},
-                            'likeCount': {
-                                '$sum': 1
-                            }}
-                        }, {
-                            '$sort': {
-                            'likeCount': -1
-                            }
-                        }
-                    ]);
-                } 
-                else{
-                    posts = await PostMessage.aggregate([
-                        {
-                            '$unwind': {
-                            'path': '$likes'
-                            }
-                        }, {
-                            '$match': { $or: [ { title }, { tags: { $in: tags.split(',') } } ]}
-                        }, {
-                            '$group': {
-                            '_id': {'_id':'$_id', 'title': '$title', 'message': '$message','name': '$name','creator': '$creator',
-                            'codeUrl': '$codeUrl','demoUrl': '$demoUrl','demoUrl': '$demoUrl','imageUrl': '$imageUrl',
-                            'selectedFile': '$selectedFile','comments': '$comments','createdAt': '$createdAt',},
-                            'likeCount': {
-                                '$sum': 1
-                            }}
-                        }, {
-                            '$sort': {
-                            'likeCount': -1
-                            }
-                        }
-                    ]);
-                } 
-                break;
-            case 'leastPopular':
-                if(searchQuery=='none' && tags==''){
-                    posts = await PostMessage.aggregate([
-                        {
-                            '$unwind': {
-                            'path': '$likes'
-                            }
-                        }, {
-                            '$group': {
-                            '_id': {'_id':'$_id', 'title': '$title', 'message': '$message','name': '$name','creator': '$creator',
-                            'codeUrl': '$codeUrl','demoUrl': '$demoUrl','demoUrl': '$demoUrl','imageUrl': '$imageUrl',
-                            'selectedFile': '$selectedFile','comments': '$comments','createdAt': '$createdAt',},
-                            'likeCount': {
-                                '$sum': 1
-                            }}
-                        }, {
-                            '$sort': {
-                            'likeCount': 1
-                            }
-                        }
-                    ]);
-                } 
-                else{
-                    posts = await PostMessage.aggregate([
-                        {
-                            '$unwind': {
-                            'path': '$likes'
-                            }
-                        }, {
-                            '$match': { $or: [ { title }, { tags: { $in: tags.split(',') } } ]}
-                        }, {
-                            '$group': {
-                            '_id': {'_id':'$_id', 'title': '$title', 'message': '$message','name': '$name','creator': '$creator',
-                            'codeUrl': '$codeUrl','demoUrl': '$demoUrl','demoUrl': '$demoUrl','imageUrl': '$imageUrl',
-                            'selectedFile': '$selectedFile','comments': '$comments','createdAt': '$createdAt',},
-                            'likeCount': {
-                                '$sum': 1
-                            }}
-                        }, {
-                            '$sort': {
-                            'likeCount': 1
-                            }
-                        }
-                    ]);
-                } 
-                break;
-            default:
-                if(searchQuery=='none' && tags=='') posts = await PostMessage.find();
-                posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]});
-                break;
+    // const posts = await PostMessage.find({ $or: [ { title }, { tags: { $in: tags.split(',') } } ]});
+
+    let posts;
+    switch (sortBy) {
+      case "":
+        posts = await PostMessage.find({
+          $or: [{ title }, { tags: { $in: tags.split(",") } }],
+        });
+        break;
+      case "oldest":
+        if (searchQuery == "none" && tags == "")
+          posts = await PostMessage.find().sort({ createdAt: 1 });
+        else
+          posts = await PostMessage.find({
+            $or: [{ title }, { tags: { $in: tags.split(",") } }],
+          }).sort({ createdAt: 1 });
+        break;
+      case "latest":
+        if (searchQuery == "none" && tags == "")
+          posts = await PostMessage.find().sort({ createdAt: -1 });
+        else
+          posts = await PostMessage.find({
+            $or: [{ title }, { tags: { $in: tags.split(",") } }],
+          }).sort({ createdAt: -1 });
+        break;
+      case "mostPopular":
+        if (searchQuery == "none" && tags == "") {
+          posts = await PostMessage.aggregate([
+            {
+              $unwind: {
+                path: "$likes",
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  _id: "$_id",
+                  title: "$title",
+                  message: "$message",
+                  name: "$name",
+                  creator: "$creator",
+                  codeUrl: "$codeUrl",
+                  demoUrl: "$demoUrl",
+                  demoUrl: "$demoUrl",
+                  imageUrl: "$imageUrl",
+                  selectedFile: "$selectedFile",
+                  comments: "$comments",
+                  createdAt: "$createdAt",
+                },
+                likeCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $sort: {
+                likeCount: -1,
+              },
+            },
+          ]);
+        } else {
+          posts = await PostMessage.aggregate([
+            {
+              $unwind: {
+                path: "$likes",
+              },
+            },
+            {
+              $match: { $or: [{ title }, { tags: { $in: tags.split(",") } }] },
+            },
+            {
+              $group: {
+                _id: {
+                  _id: "$_id",
+                  title: "$title",
+                  message: "$message",
+                  name: "$name",
+                  creator: "$creator",
+                  codeUrl: "$codeUrl",
+                  demoUrl: "$demoUrl",
+                  demoUrl: "$demoUrl",
+                  imageUrl: "$imageUrl",
+                  selectedFile: "$selectedFile",
+                  comments: "$comments",
+                  createdAt: "$createdAt",
+                },
+                likeCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $sort: {
+                likeCount: -1,
+              },
+            },
+          ]);
         }
-
-        let tempObj = []
-        if(posts[0].likeCount!==undefined){
-            for(let i = 0; i<posts.length; i++){
-                let fetchLike = await PostMessage.findById(posts[i]._id._id);
-                let likeObj = {
-                    'likeCount':posts[i].likeCount,
-                    'likes': fetchLike.likes,
-                };
-                let newObj = { ...likeObj, ...posts[i]._id}
-                tempObj.push(newObj);
-            }
-            posts = tempObj;
-        } 
-
-        res.json({ data: posts });
-    } catch (error) {    
-        res.status(404).json({ message: error.message });
+        break;
+      case "leastPopular":
+        if (searchQuery == "none" && tags == "") {
+          posts = await PostMessage.aggregate([
+            {
+              $unwind: {
+                path: "$likes",
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  _id: "$_id",
+                  title: "$title",
+                  message: "$message",
+                  name: "$name",
+                  creator: "$creator",
+                  codeUrl: "$codeUrl",
+                  demoUrl: "$demoUrl",
+                  demoUrl: "$demoUrl",
+                  imageUrl: "$imageUrl",
+                  selectedFile: "$selectedFile",
+                  comments: "$comments",
+                  createdAt: "$createdAt",
+                },
+                likeCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $sort: {
+                likeCount: 1,
+              },
+            },
+          ]);
+        } else {
+          posts = await PostMessage.aggregate([
+            {
+              $unwind: {
+                path: "$likes",
+              },
+            },
+            {
+              $match: { $or: [{ title }, { tags: { $in: tags.split(",") } }] },
+            },
+            {
+              $group: {
+                _id: {
+                  _id: "$_id",
+                  title: "$title",
+                  message: "$message",
+                  name: "$name",
+                  creator: "$creator",
+                  codeUrl: "$codeUrl",
+                  demoUrl: "$demoUrl",
+                  demoUrl: "$demoUrl",
+                  imageUrl: "$imageUrl",
+                  selectedFile: "$selectedFile",
+                  comments: "$comments",
+                  createdAt: "$createdAt",
+                },
+                likeCount: {
+                  $sum: 1,
+                },
+              },
+            },
+            {
+              $sort: {
+                likeCount: 1,
+              },
+            },
+          ]);
+        }
+        break;
+      default:
+        if (searchQuery == "none" && tags == "")
+          posts = await PostMessage.find();
+        posts = await PostMessage.find({
+          $or: [{ title }, { tags: { $in: tags.split(",") } }],
+        });
+        break;
     }
-}
+
+    let tempObj = [];
+    if (posts[0].likeCount !== undefined) {
+      for (let i = 0; i < posts.length; i++) {
+        let fetchLike = await PostMessage.findById(posts[i]._id._id);
+        let likeObj = {
+          likeCount: posts[i].likeCount,
+          likes: fetchLike.likes,
+        };
+        let newObj = { ...likeObj, ...posts[i]._id };
+        tempObj.push(newObj);
+      }
+      posts = tempObj;
+    }
+
+    res.json({ data: posts });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
 export const getPostsByCreator = async (req, res) => {
-    const { creator } = req.query;
+  const { creator } = req.query;
 
-    try {
-        const posts = await PostMessage.find({ creator:creator });
-        
-        res.json({ data: posts });
-    } catch (error) {    
-        res.status(404).json({ message: error.message });
-    }
-}
+  try {
+    const posts = await PostMessage.find({ creator: creator });
 
-export const getPost = async (req, res) => { 
-    const { id } = req.params;
+    res.json({ data: posts });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
-    try {
-        const post = await PostMessage.findById(id);
-        
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
-}
+export const getPost = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const post = await PostMessage.findById(id);
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
 
 export const createPost = async (req, res) => {
-    const post = req.body;
+  const post = req.body;
 
-    const newPostMessage = new PostMessage({ ...post, creator: req.userId, createdAt: new Date().toISOString() })
+  const newPostMessage = new PostMessage({
+    ...post,
+    creator: req.userId,
+    createdAt: new Date().toISOString(),
+  });
 
-    try {
-        await newPostMessage.save();
+  try {
+    await newPostMessage.save();
 
-        res.status(201).json(newPostMessage);
-    } catch (error) {
-        res.status(409).json({ message: error.message });
-    }
-}
+    res.status(201).json(newPostMessage);
+  } catch (error) {
+    res.status(409).json({ message: error.message });
+  }
+};
 
 export const updatePost = async (req, res) => {
-    const { id } = req.params;
-    const { title, message, creator, selectedFile, tags, imageUrl } = req.body;
-    
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+  const { id } = req.params;
+  const {
+    title,
+    message,
+    creator,
+    codeUrl,
+    demoUrl,
+    selectedFile,
+    tags,
+    imageUrl,
+  } = req.body;
 
-    const updatedPost = { creator, title, message, tags, selectedFile, _id: id, imageUrl:imageUrl };
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(404).send(`No post with id: ${id}`);
 
-    await PostMessage.findByIdAndUpdate(id, updatedPost, { new: true });
+  const updatedPost = {
+    creator,
+    title,
+    message,
+    tags,
+    codeUrl,
+    demoUrl,
+    selectedFile,
+    _id: id,
+    imageUrl: imageUrl,
+  };
 
-    res.json(updatedPost);
-}
+  await PostMessage.findByIdAndUpdate(id, updatedPost, { new: true });
+
+  res.json(updatedPost);
+};
 
 export const deletePost = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(404).send(`No post with id: ${id}`);
 
-    await PostMessage.findByIdAndRemove(id);
+  await PostMessage.findByIdAndRemove(id);
 
-    res.json({ message: "Post deleted successfully." });
-}
+  res.json({ message: "Post deleted successfully." });
+};
 
 export const likePost = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    if (!req.userId) {
-        return res.json({ message: "Unauthenticated" });
-      }
+  if (!req.userId) {
+    return res.json({ message: "Unauthenticated" });
+  }
 
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send(`No post with id: ${id}`);
-    
-    const post = await PostMessage.findById(id);
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(404).send(`No post with id: ${id}`);
 
-    const index = post.likes.findIndex((id) => id ===String(req.userId));
+  const post = await PostMessage.findById(id);
 
-    if (index === -1) {
-      post.likes.push(req.userId);
-    } else {
-      post.likes = post.likes.filter((id) => id !== String(req.userId));
-    }
+  const index = post.likes.findIndex((id) => id === String(req.userId));
 
-    const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true });
+  if (index === -1) {
+    post.likes.push(req.userId);
+  } else {
+    post.likes = post.likes.filter((id) => id !== String(req.userId));
+  }
 
-    res.status(200).json(updatedPost);
-}
+  const updatedPost = await PostMessage.findByIdAndUpdate(id, post, {
+    new: true,
+  });
+
+  res.status(200).json(updatedPost);
+};
 
 export const commentPost = async (req, res) => {
-    const { id } = req.params;
-    const { value } = req.body;
+  const { id } = req.params;
+  const { value } = req.body;
 
-    const post = await PostMessage.findById(id);
+  const post = await PostMessage.findById(id);
 
-    post.comments.push(value);
+  post.comments.push(value);
 
-    const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true });
+  const updatedPost = await PostMessage.findByIdAndUpdate(id, post, {
+    new: true,
+  });
 
-    res.json(updatedPost);
+  res.json(updatedPost);
 };
 
 export default router;

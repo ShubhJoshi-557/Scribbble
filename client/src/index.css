@@ -142,6 +142,15 @@ footer a{
         width: 350px;
         padding: none;
     }
+    .search-box .name{
+        border-top-right-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
+        width: 290px !important;
+    }
+    .search-box .tag{
+        margin: 5px auto;
+        border: none;
+    }
     /* #eaeaeb */
     .MuiAppBar-root{
         margin-bottom: 100px !important;
