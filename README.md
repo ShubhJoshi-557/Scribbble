@@ -8,7 +8,14 @@
 
 ## About
 Scribbble is a fullstack social media web application inspired by Dribbble, made for Developers and Web Designers to share their projects and get inspiration from other's projects.
-Website: https://ssj-scribbble.netlify.app/posts
+Website: https://ssj-scribbble.netlify.app/
+
+## Tech Stack
+- React: front-end framework
+- Redux: global state management
+- MongoDB: database
+- Express: server
+- Node: backend server
 
 ## Setup:
 - run ```npm i && npm start``` for both client and server side to start the app
