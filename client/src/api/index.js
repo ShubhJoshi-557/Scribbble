@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'https://ssj-scribbble.herokuapp.com/' });
+const API = axios.create({ baseURL: 'https://scribbble-backend-production.up.railway.app/' });
+// http://localhost:5000
+// https://scribbble-backend-production.up.railway.app/
 // https://ssj-scribbble.herokuapp.com/
 
 API.interceptors.request.use((req) => {
